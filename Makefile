@@ -37,6 +37,7 @@ test: $(TEST_EXES)
 	./$(TEST_EXES)
 
 clean:
-	rm -rf $(BUILD_DIR)
+	@echo "Cleaning build directory..."
+	@rm -rf $(BUILD_DIR)
 
 .PHONY: all clean test

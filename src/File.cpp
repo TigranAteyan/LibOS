@@ -20,7 +20,8 @@ File::File()
     std::filesystem::create_directories(filePath);
 
     fileStream.open(fullPath, std::ios::out);
-    if (!fileStream.is_open()) {
+    if (!fileStream.is_open()) 
+    {
         throw std::runtime_error("Can't create file " + fullPath.string());
     }
 }
@@ -40,7 +41,8 @@ File::File(const std::string& name, const std::string& path) : fileName(name), f
     std::filesystem::create_directories(filePath);
 
     fileStream.open(fullPath, std::ios::out);
-    if (!fileStream.is_open()) {
+    if (!fileStream.is_open()) 
+    {
         throw std::runtime_error("Can't create file " + fullPath.string());
     }
 }
@@ -50,10 +52,12 @@ File::~File() {}
 
 void File::openFile()
 {
-    if (!fileStream.is_open()) {
+    if (!fileStream.is_open()) 
+    {
         std::filesystem::path fullPath = std::filesystem::path(filePath) / fileName;
         fileStream.open(fullPath, std::ios::in | std::ios::out | std::ios::app);
-        if (!fileStream.is_open()) {
+        if (!fileStream.is_open()) 
+        {
             throw std::runtime_error("Can't open file " + fullPath.string());
         }
     }
@@ -61,7 +65,8 @@ void File::openFile()
 
 void File::closeFile()
 {
-    if (fileStream.is_open()) {
+    if (fileStream.is_open()) 
+    {
         fileStream.close();
     }
 }
@@ -77,17 +82,31 @@ void File::launchFileInEditor() const
 
 void File::write(const std::string& data)
 {
-    if (!fileStream.is_open()) {
+    if (!fileStream.is_open()) 
+    {
         throw std::runtime_error("File is not open");
     }
     fileStream << data;
 }
 
-void File::renameFile(const std::string& newName) {
+std::optional<std::string> File::read() 
+{
+    std::ifstream in(getPath());
+    if (!in.is_open())
+        return std::nullopt;
+
+    std::stringstream buffer;
+    buffer << in.rdbuf();
+    return buffer.str();
+}
+
+void File::renameFile(const std::string& newName) 
+{
     std::filesystem::path oldFullPath = getPath();
     std::filesystem::path newFullPath = std::filesystem::path(filePath) / newName;
 
-    if (!std::filesystem::exists(oldFullPath)) {
+    if (!std::filesystem::exists(oldFullPath)) 
+    {
         throw std::runtime_error("File does not exist to rename");
     }
 
@@ -98,26 +117,33 @@ void File::renameFile(const std::string& newName) {
 
 void File::removeFile()
 {
-    if (fileStream.is_open()) {
+    if (fileStream.is_open()) 
+    {
         fileStream.close();
     }
 
     std::filesystem::path fullPath = std::filesystem::path(filePath) / fileName;
     std::error_code ec;
-    if (!std::filesystem::remove(fullPath, ec)) {
+    if (!std::filesystem::remove(fullPath, ec)) 
+    {
         std::cerr << "Failed to delete file " << fullPath << ": " << ec.message() << "\n";
     }
 }
 
-bool File::isOpen()
+bool File::isOpen() const noexcept
 {
     return fileStream.is_open();
 }
 
-std::string File::getPath() const
+std::string File::getPath() const noexcept
 {
     std::filesystem::path fullPath = std::filesystem::path(filePath) / fileName;
     return fullPath.string();
 }
 
-std::string File::getName() const { return fileName; }
+std::string File::getName() const noexcept { return fileName; }
+
+bool File::exists() const noexcept 
+{
+    return std::filesystem::exists(getPath());
+}
