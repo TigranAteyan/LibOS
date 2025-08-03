@@ -10,7 +10,7 @@ public:
     File();
     File(const std::string& name);
     File(const std::string& name, const std::string& path);
-    virtual ~File();
+    ~File();
 
     void openFile();
     void closeFile();
