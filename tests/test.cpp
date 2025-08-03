@@ -8,11 +8,13 @@ namespace fs = std::filesystem;
 class FileTest : public ::testing::Test {
 protected:
     void TearDown() override {
-        fs::remove("new.txt");
-        fs::remove("test.txt");
-        fs::remove("renamed.txt");
-        fs::remove("new0.txt");
-        fs::remove("new1.txt");
+        std::vector<std::string> files = {
+            "new.txt", "test.txt", "renamed.txt", "new0.txt", "new1.txt"
+        };
+        for (const auto& filename : files) {
+            File f(filename);
+            f.removeFile();
+        }
         fs::remove_all("temp");
     }
 };
@@ -30,7 +32,7 @@ TEST_F(FileTest, CreatesFileWithCustomName) {
 TEST_F(FileTest, CreatesFileInCustomDirectory) {
     std::string path = "temp";
     File f("test.txt", path);
-    EXPECT_TRUE(fs::exists(path + "/test.txt"));
+    EXPECT_TRUE(fs::exists(fs::path(path) / "test.txt"));
 }
 
 TEST_F(FileTest, WritesDataToFile) {
@@ -67,14 +69,21 @@ TEST_F(FileTest, RemoveFileActuallyDeletesFile) {
 
 TEST_F(FileTest, RenameFileChangesNameCorrectly) {
     File f("test.txt");
+    f.openFile();
+    f.closeFile();
+
+    EXPECT_TRUE(fs::exists("test.txt"));  
+
     f.renameFile("renamed.txt");
+
     EXPECT_EQ(f.getName(), "renamed.txt");
+    EXPECT_TRUE(fs::exists("renamed.txt"));
+    EXPECT_FALSE(fs::exists("test.txt"));
 }
+
 
 TEST_F(FileTest, GetPathReturnsFullPath) {
     File f("test.txt", "temp");
     std::string expected = (fs::path("temp") / "test.txt").string();
     EXPECT_EQ(f.getPath(), expected);
 }
-
-
